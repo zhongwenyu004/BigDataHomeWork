@@ -1,60 +1,14 @@
-select * from 
-        (select a.sex,a.MovieName,AVG(a.rate) as RateAVG,count(a.rate) as total from         |
-                (select u.sex,m.MovieName,r.rate from t_rating as r   |                      |  将影评数据分组 求出评论数以及平均分
-                left join t_user as u on r.UserID = u.UserID          |将男性影评数据找出来    | 
-                left join t_movie as m on r.MovieID = m.MovieID       |                      |
-                where u.Sex = 'M') as a                               |                      |
-        group by a.MovieName,a.sex) as s
-where s.total> 50
-order by RateAVG desc
+select r.UserID,count(r.rate) as count from t_rating r left join t_user as u on r.UserID = u.UserID where U.sex='F' group by r.UserID order by count desc limit 1 
+影评数最多的那个女的
+
+select a.* from t_rating as a right join (
+select r.UserID,count(r.rate) as count from t_rating r left join t_user as u on r.UserID = u.UserID where U.sex='F' group by r.UserID order by count desc limit 1 )as b
+on a.UserID = b.UserID 
+order by rate desc
 limit 10
-
-在 影评分析后数据 找出评论数大于50 并且降序排列 取前10 
-
-运行结果
-
-hive> select * from 
-    > (select a.sex,a.MovieName,AVG(a.rate) as RateAVG,count(a.rate) as total from 
-    > (select u.sex,m.MovieName,r.rate from t_rating as r 
-    > left join t_user as u on r.UserID = u.UserID 
-    > left join t_movie as m on r.MovieID = m.MovieID 
-    > where u.Sex = 'M') as a
-    > group by a.MovieName,a.sex) as s
-    > where s.total> 50
-    > order by RateAVG desc
-    > limit 10;
-No Stats for zhongwenyu@t_rating, Columns: rate, movieid, userid
-No Stats for zhongwenyu@t_user, Columns: sex, userid
-No Stats for zhongwenyu@t_movie, Columns: movieid, moviename
-Query ID = student5_20220402202056_1d4462d6-485e-4719-beda-784265999247
-Total jobs = 1
-Launching Job 1 out of 1
-Status: Running (Executing on YARN cluster with App id application_1645699879292_1545)
-
-----------------------------------------------------------------------------------------------
-        VERTICES      MODE        STATUS  TOTAL  COMPLETED  RUNNING  PENDING  FAILED  KILLED  
-----------------------------------------------------------------------------------------------
-Map 4 .......... container     SUCCEEDED      1          1        0        0       0       0  
-Map 5 .......... container     SUCCEEDED      1          1        0        0       0       0  
-Map 1 .......... container     SUCCEEDED      1          1        0        0       0       0  
-Reducer 2 ...... container     SUCCEEDED      4          4        0        0       0       0  
-Reducer 3 ...... container     SUCCEEDED      1          1        0        0       0       0  
-----------------------------------------------------------------------------------------------
-VERTICES: 05/05  [==========================>>] 100%  ELAPSED TIME: 12.07 s    
-----------------------------------------------------------------------------------------------
-OK
-M	Sanjuro (1962)	4.639344262295082	61
-M	Godfather, The (1972)	4.583333333333333	1740
-M	Seven Samurai (The Magnificent Seven) (Shichinin no samurai) (1954)	4.576628352490421	522
-M	Shawshank Redemption, The (1994)	4.560625	1600
-M	Raiders of the Lost Ark (1981)	4.520597322348094	1942
-M	Usual Suspects, The (1995)	4.518248175182482	1370
-M	Star Wars: Episode IV - A New Hope (1977)	4.495307167235495	2344
-M	Schindler's List (1993)	4.49141503848431	1689
-M	Paths of Glory (1957)	4.485148514851486	202
-M	Wrong Trousers, The (1993)	4.478260869565218	644
-Time taken: 14.29 seconds, Fetched: 10 row(s)
+那个女的评价的电影 按评分排序
 
 
 
 
+over() 窗口函数 可能会解决这个问题 但是研究不明白了 G！！！！
