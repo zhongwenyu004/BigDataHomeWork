@@ -1,14 +1,93 @@
 select r.UserID,count(r.rate) as count from t_rating r left join t_user as u on r.UserID = u.UserID where U.sex='F' group by r.UserID order by count desc limit 1 
 影评数最多的那个女的
-
+----------------------------------------------------
 select a.* from t_rating as a right join (
 select r.UserID,count(r.rate) as count from t_rating r left join t_user as u on r.UserID = u.UserID where U.sex='F' group by r.UserID order by count desc limit 1 )as b
 on a.UserID = b.UserID 
-order by rate desc
-limit 10
-那个女的评价的电影 按评分排序
+where a.rate > 4
+order by a.rate desc
+那个女的评价的电影 按评分为5的电影影评信息
+------------------------------------------------------------
+select MovieID , AVG(Rate) as rateAVG from t_rating group by MovieID order by rateAVG desc; (返回分组数据)
+select MovieID , AVG(Rate)over(partition by r.MovieID) as rateAVG from t_rating order by rateAVG desc(平均数会成为一个字段，返回100W+数据)
+所有电影平均评分
+
+-----------------------------------------------------------------
+select n.*,m.MovieName,m.movieID from t_movie as m right join(
+select r.* from t_rating as r right join
+(select r.MovieID,r.UserID,count(r.rate)over(partition by r.UserID) as count from t_rating r left join t_user as u on r.UserID = u.UserID where U.sex='F'  order by count desc limit 1 )as b
+on r.UserID = b.UserID 
+where r.rate > 4
+order by r.rate,r.MovieiD desc) as n
+on m.MovieID = n.MovieID
+那个女的评价的电影 按评分为5的电影影评信息 带名字
+
+----------------------------------------------------------------------------------------------------------------------
+select z.movieName,g.rateAVG from (select r.MovieID , AVG(r.Rate) as rateAVG from t_rating as r group by r.MovieID) as g 
+right join 
+(select n.*,m.MovieName,m.movieID from t_movie as m right join(
+select r.* from t_rating as r right join
+(select r.MovieID,r.UserID,count(r.rate)over(partition by r.UserID) as count from t_rating r left join t_user as u on r.UserID = u.UserID where U.sex='F'  order by count desc limit 1 )as b
+on r.UserID = b.UserID 
+where r.rate > 4
+order by r.rate,r.MovieiD desc) as n
+on m.MovieID = n.MovieID) as z
+on z.movieID=g.movieID
+order by g.rateAVG desc limit 10
+最终题目要求的答案语句
+
+hive> select z.movieName,g.rateAVG from (select r.MovieID , AVG(r.Rate) as rateAVG from t_rating as r group by r.MovieID) as g 
+    > right join 
+    > (select n.*,m.MovieName,m.movieID from t_movie as m right join(
+    > select r.* from t_rating as r right join
+    > (select r.MovieID,r.UserID,count(r.rate)over(partition by r.UserID) as count from t_rating r left join t_user as u on r.UserID = u.UserID where U.sex='F'  order by count desc limit 1 )as b
+    > on r.UserID = b.UserID 
+    > where r.rate > 4
+    > order by r.rate,r.MovieiD desc) as n
+    > on m.MovieID = n.MovieID) as z
+    > on z.movieID=g.movieID
+    > order by g.rateAVG desc limit 10;
+No Stats for zhongwenyu@t_rating, Columns: rate, movieid
+No Stats for zhongwenyu@t_movie, Columns: movieid, moviename
+No Stats for zhongwenyu@t_rating, Columns: userid
+No Stats for zhongwenyu@t_user, Columns: sex, userid
+Query ID = student5_20220403010839_cf1bb04b-95d3-4714-9554-8efe1d799953
+Total jobs = 1
+Launching Job 1 out of 1
+Status: Running (Executing on YARN cluster with App id application_1645699879292_1604)
+
+----------------------------------------------------------------------------------------------
+        VERTICES      MODE        STATUS  TOTAL  COMPLETED  RUNNING  PENDING  FAILED  KILLED  
+----------------------------------------------------------------------------------------------
+Map 2 .......... container     SUCCEEDED      1          1        0        0       0       0  
+Map 10 ......... container     SUCCEEDED      1          1        0        0       0       0  
+Map 7 .......... container     SUCCEEDED      1          1        0        0       0       0  
+Reducer 8 ...... container     SUCCEEDED      4          4        0        0       0       0  
+Reducer 9 ...... container     SUCCEEDED      1          1        0        0       0       0  
+Reducer 3 ...... container     SUCCEEDED      6          6        0        0       0       0  
+Map 1 .......... container     SUCCEEDED      1          1        0        0       0       0  
+Reducer 4 ...... container     SUCCEEDED      1          1        0        0       0       0  
+Map 11 ......... container     SUCCEEDED      1          1        0        0       0       0  
+Reducer 12 ..... container     SUCCEEDED      1          1        0        0       0       0  
+Reducer 5 ...... container     SUCCEEDED      1          1        0        0       0       0  
+Reducer 6 ...... container     SUCCEEDED      1          1        0        0       0       0  
+----------------------------------------------------------------------------------------------
+VERTICES: 12/12  [==========================>>] 100%  ELAPSED TIME: 14.37 s    
+----------------------------------------------------------------------------------------------
+OK
+Godfather, The (1972)	4.524966261808367
+Close Shave, A (1995)	4.52054794520548
+Wrong Trousers, The (1993)	4.507936507936508
+Rear Window (1954)	4.476190476190476
+Star Wars: Episode IV - A New Hope (1977)	4.453694416583082
+Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963)	4.4498902706656915
+City Lights (1931)	4.387453874538745
+Godfather: Part II, The (1974)	4.357565011820331
+Creature Comforts (1990)	4.335766423357664
+Some Like It Hot (1959)	4.300480769230769
+Time taken: 16.311 seconds, Fetched: 10 row(s)
+
+虽然结果跟老师给的答案不一样 但是我不觉得我的有问题
+然后就是去寻找老师的答案了
 
 
-
-
-over() 窗口函数 可能会解决这个问题 但是研究不明白了 G！！！！
