@@ -1,5 +1,6 @@
 select r.UserID,count(r.rate) as count from t_rating r left join t_user as u on r.UserID = u.UserID where U.sex='F' group by r.UserID order by count desc limit 1 
 影评数最多的那个女的
+(UserID:1150 count:1302)
 ----------------------------------------------------
 select a.* from t_rating as a right join (
 select r.UserID,count(r.rate) as count from t_rating r left join t_user as u on r.UserID = u.UserID where U.sex='F' group by r.UserID order by count desc limit 1 )as b
@@ -89,5 +90,6 @@ Time taken: 16.311 seconds, Fetched: 10 row(s)
 
 虽然结果跟老师给的答案不一样 但是我不觉得我的有问题
 然后就是去寻找老师的答案了
+
 
 
