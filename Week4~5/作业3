@@ -88,9 +88,32 @@ Creature Comforts (1990)	4.335766423357664
 Some Like It Hot (1959)	4.300480769230769
 Time taken: 16.311 seconds, Fetched: 10 row(s)
 
-结果跟老师给的答案不一样 
+结果跟老师给的答案不一样
 
 然后就是去寻找老师的答案了
+
+
+
+
+
+
+
+WITH top_user AS (
+  SELECT u.userid userid,count(*) total_rate FROM t_user u JOIN t_rating r ON u.userid = r.userid AND u.sex = "F" GROUP BY u.userid ORDER BY total_rate DESC LIMIT 1
+), top_movieid AS (
+  SELECT r.movieid movieid, r.rate FROM t_rating r WHERE r.userid IN (SELECT userid FROM top_user) ORDER BY r.rate DESC LIMIT 10), 
+  movie_avgrate AS ( SELECT r.movieid movieid, avg(r.rate) avgrate FROM t_rating r GROUP BY r.movieid ORDER BY r.movieid
+)
+SELECT m.moviename moviename, a.avgrate avgrate FROM (SELECT t.movieid movieid, m.avgrate avgrate FROM top_movieid t JOIN movie_avgrate m ON t.movieid = m.movieid) a
+  JOIN t_movie m ON a.movieid = m.movieid;
+  
+  上面是能跑出老师答案的语句 
+  出现偏差是因为
+  top_movieid AS (SELECT r.movieid movieid, r.rate FROM t_rating r WHERE r.userid IN (SELECT userid FROM top_user) ORDER BY r.rate DESC LIMIT 10),
+  这里取了前10 但是那个1150给满分的电影 超过10部 我取的 r.rate > 4 
+
+
+
 
 
 
